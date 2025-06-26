@@ -77,3 +77,19 @@ __MQTT Message Flow:__
 		- If no PINGRESP is received within this grace period, the broker considers the connection dead.
 		- Broker initiates connection cleanup upon no response.
 		- The broker initiates connection cleanup when no keepalive (PINGRESP) is received within the timeout period.
+
+## MQTT Topic
+
+- MQTT topics are a form of addressig used for communication between clients.
+- Topic name structure:
+	- There is no formal or fixed structure for mqtt topics.
+	- Topic names are case sensitive.
+		- e.g., *home/light ≠ home/LIGHT*
+	- A topics name must consist of at least one character.
+	- Topic name consist of level seperated by forward slash (/), which act as delimeters.
+		- e.g., *house/room1/main-light*
+		- e.g., *house/room1/alarm*
+	- System topics start with __$SYS__ and user can't use system topics names as topics.
+		- e.g., *$SYS/broker/version*
+		
+
