@@ -10,8 +10,8 @@
 	- Publisher  : A client that sends data is called a publisher (or sender).
 	- Subscriber : A client that receives data is called a subscriber (or receiver).
 	- Broker     : This is the central and controlling entity of the MQTT protocol.
-					 - The publisher sends data to the broker, and the broker forwards that data to the subscriber.
-					 - The publisher sends data to the broker, and the broker forwards that data to the subscriber.
+		- The publisher sends data to the broker, and the broker forwards that data to the subscriber.
+		- The publisher sends data to the broker, and the broker forwards that data to the subscriber.
 
 - MQTT Topics:
 	- Topics are used for publishing and subscribing to data.
@@ -71,13 +71,26 @@ __MQTT Message Flow:__
 	
 - KeepAlive Time:
 	- Broker maintain keepalive interval to ensure connectivity of client.
-	- Its time intrval (default __60 sec__) after which broker sends ping request (PINGREQ) to client and receive ping response (PINGRESP).
+	- Its time intrval (default __60 sec__) after which broker sends ping request __(PINGREQ)__ to client and receive ping response __(PINGRESP)__.
 		- If broker received ping response then it means client is still connected with broker.
 	- Broker waits for 1.5x the keepalive interval (e.g., __90 seconds__ for default __60s__ keepalive).
-		- If no PINGRESP is received within this grace period, the broker considers the connection dead.
+		- If no __PINGRESP__ is received within this grace period, the broker considers the connection dead.
 		- Broker initiates connection cleanup upon no response.
-		- The broker initiates connection cleanup when no keepalive (PINGRESP) is received within the timeout period.
+		- The broker initiates connection cleanup when no keepalive __(PINGRESP)__ is received within the timeout period.
 
+- Connection Cleanup:
+	- When broker does not receive __PINGRESP__ for keepalive interval then broker initiate connection cleanup.
+	- Broker forcibly closes the TCP connection.
+	- All active subscriptions from that client are removed.
+	- Session state is handled based on the client's Clean Session flag:
+		- Clean Session=1: All session data is deleted
+		- Clean Session=0: Session is retained (per QoS rules) until client reconnects
+	- Last Will Execution (if configured):
+		- Broker publishes the client's predefined *"Last Will and Testament"*. This alerts subscribers that the client disconnected abnormally.
+	- Resource Release:
+		- Network resources are freed.
+		- Broker memory allocated for the connection is reclaimed.
+		
 ## MQTT Topic
 
 - MQTT topics are a form of addressig used for communication between clients.
