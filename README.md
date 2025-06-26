@@ -2,6 +2,7 @@
 
 ## Introduction
 
+- MQTT is a lightweight messaging protocol ideal for IoT (Internet of Things).
 - MQTT is a publish/subscribe protocol.
 	- This means one client publishes (sends) data, while another client subscribes to (receives) that data.
 
@@ -24,8 +25,8 @@
 	- The broker sends that data to all clients subscribed to the corresponding topic.
 	- A client must subscribe to a particular topic in order to receive data from that topic.	
 		
-Broker:
-    - The broker acts as the central unit in the MQTT communication model.
+- Broker:
+	- The broker acts as the central unit in the MQTT communication model.
 	- Publishers and subscribers are completely unaware of each other; they communicate indirectly through the broker.
 	- All clients publish data to the broker, which then forwards that data to the appropriate subscribers.
 	- The broker is responsible for filtering messages based on topics and delivering them only to subscribers of those topics.
@@ -37,7 +38,42 @@ Broker:
 	- When client send data, on topic, its a publisher at that time.
 	- And when it receive data, on some topic, then it become subscriber.
 
-Publisher and Subscriber Roles:
+- Publisher and Subscriber Roles:
 	- Any client can act as both a publisher and a subscriber at the same time.
 		- When a client sends data on a topic, it acts as a publisher.
 		- When it receives data on a topic, it acts as a subscriber.
+
+## MQTT Client-Broker Connections
+
+- MQTT is a connection-oriented protocol that uses TCP/IP for communication.
+- It provides error correction and guaranteed message delivery (in-order) over TCP/IP.
+- Every message requires an acknowledgment (ACK) for reliable delivery.
+	- If the sender doesn't receive an ACK, the message is resent automatically.
+
+__MQTT Message Flow:__
+
+	MQTT Client                        MQTT Broker
+	    |                                  |
+        |             Connect              |
+	    |          ------------->          |
+  	    |             CONNACK              |
+  	    |          <-------------          |
+  	    |                                  |
+  	    |             Subscribe            |
+  	    |          ------------->          |
+  	    |             SUBACK               |
+  	    |          <-------------          |
+  	    |                                  |
+  	    |             Publish              |
+  	    |          ------------->          |
+  	    |             PUBACK               |
+  	    |          <-------------          |
+	
+- KeepAlive Time:
+	- Broker maintain keepalive interval to ensure connectivity of client.
+	- Its time intrval (default __60 sec__) after which broker sends ping request (PINGREQ) to client and receive ping response (PINGRESP).
+		- If broker received ping response then it means client is still connected with broker.
+	- Broker waits for 1.5x the keepalive interval (e.g., __90 seconds__ for default __60s__ keepalive).
+		- If no PINGRESP is received within this grace period, the broker considers the connection dead.
+		- Broker initiates connection cleanup upon no response.
+		- The broker initiates connection cleanup when no keepalive (PINGRESP) is received within the timeout period.
