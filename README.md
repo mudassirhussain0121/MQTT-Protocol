@@ -44,11 +44,12 @@
 - Every message requires an acknowledgment (ACK) for reliable delivery.
 	- If the sender doesn't receive an ACK, the message is resent automatically.
 
-__MQTT Message Flow:__
+- <ins>MQTT Message Flow:</ins>
 
+```
 	MQTT Client                        MQTT Broker
 	    |                                  |
-        |             Connect              |
+	    |             Connect              |
 	    |          ------------->          |
   	    |             CONNACK              |
   	    |          <-------------          |
@@ -62,25 +63,26 @@ __MQTT Message Flow:__
   	    |          ------------->          |
   	    |             PUBACK               |
   	    |          <-------------          |
-	
+```
+
 - <ins>KeepAlive Time:</ins>
 	- Broker maintain keepalive interval to ensure connectivity of client.
-	- Its time intrval (default __60 sec__) after which broker sends ping request __(PINGREQ)__ to client and receive ping response __(PINGRESP)__.
+	- Its time intrval (default __60 sec__) after which broker sends ping request `(PINGREQ)` to client and receive ping response `(PINGRESP)`.
 		- If broker received ping response then it means client is still connected with broker.
-	- Broker waits for 1.5x the keepalive interval (e.g., __90 seconds__ for default __60s__ keepalive).
-		- If no __PINGRESP__ is received within this grace period, the broker considers the connection dead.
+	- Broker waits for `1.5x` the keepalive interval (e.g., __90 seconds__ for default __60s__ keepalive).
+		- If no `PINGRESP` is received within this grace period, the broker considers the connection dead.
 		- Broker initiates connection cleanup upon no response.
-		- The broker initiates connection cleanup when no keepalive __(PINGRESP)__ is received within the timeout period.
+		- The broker initiates connection cleanup when no keepalive `(PINGRESP)` is received within the timeout period.
 
 - <ins>Connection Cleanup:</ins>
-	- When broker does not receive __PINGRESP__ for keepalive interval then broker initiate connection cleanup.
+	- When broker does not receive `PINGRESP` for keepalive interval then broker initiate connection cleanup.
 	- Broker forcibly closes the TCP connection.
 	- All active subscriptions from that client are removed.
 	- Session state is handled based on the client's Clean Session flag:
-		- Clean Session = 1: All session data is deleted
-		- Clean Session = 0: Session is retained (per QoS rules) until client reconnects
+		- *`Clean Session = 1:`* All session data is deleted
+		- *`Clean Session = 0:`* Session is retained (per QoS rules) until client reconnects
 	- Last Will Execution (if configured):
-		- Broker publishes the client's predefined *"Last Will and Testament"*. This alerts subscribers that the client disconnected abnormally.
+		- Broker publishes the client's predefined *`Last Will and Testament`*. This alerts subscribers that the client disconnected abnormally.
 	- Resource Release:
 		- Network resources are freed.
 		- Broker memory allocated for the connection is reclaimed.
@@ -91,7 +93,25 @@ __MQTT Message Flow:__
 	- The last will message is stored on the broker. If the broker detects a connection break it sends the last will message to all subscribers of that topic.
 	- If client (publisher) disconnects normally (using the disconnect command), the last will message is not send.
 	- *"__Summary:__ The broker sends a last will message to all topic subscribers when it detects either an unexpected disconnection or a network failure with the publisher."*
-		
+	
+- <ins>Clean Session:</ins>
+	- MQTT clients by default establish a clean session with a broker.
+	- In clean session broker isn't expected to remeber any configuration about client when it disconnects.
+	- In non-clean session broker will remember or retain old configuration of client such as susbscriptions or qos.
+		- Broker may hold the undeleived messages in non-clean session and deliver to client when it connects again.
+	- *Clean Session Setting:*
+		- *When a client connects to an MQTT broker, it can set the __`cleanSession flag`__ to either:*
+			- *`true` → Start fresh: no prior session state is stored or restored.*
+			- *`false` → Resume previous session: broker stores subscriptions, QoS 1/2 messages, etc.*
+	- *__Summary:__*
+	
+```
+ Clean Session         Effect on Connect                  Effect on Disconnect
+ -------------         ----------------------------       ----------------------------
+ true	               No previous session is used.       All session info is deleted.
+ false                 Broker resumes old session.        Broker saves session state.
+```
+
 ## MQTT Topic
 
 - MQTT topics are a form of addressig used for communication between clients.
@@ -106,5 +126,12 @@ __MQTT Message Flow:__
 		- e.g., *house/room1/alarm*
 	- System topics start with __$SYS__ and user can't use system topics names as topics.
 		- e.g., *$SYS/broker/version*
-		
 
+## The Client Name or Client ID
+
+- The client must have a unique name or ID to connect to the broker.
+- The broker uses client name to track its subscriptions.
+- If a client attempts to connect using the same name as an existing connected client, the broker will:
+	- Terminate the existing client's connection
+	- And establish a new connection for the requesting client
+	
